@@ -6,8 +6,7 @@ import pandas as pd
 # Setup bedrock
 bedrock_runtime = boto3.client(
     service_name="bedrock-runtime",
-    region_name="us-west-2",
-
+    region_name="us-west-2"
 )
 
 model_ids = [
@@ -33,7 +32,7 @@ def generate_conversation(model_id, system_prompts, messages, temperature=0.2, m
     # Base inference parameters to use.
     inference_config = {"temperature": temperature}
     # Additional inference parameters to use.
-    additional_model_fields = {"max_tokens": max_tokens}
+    #additional_model_fields = {"max_tokens": max_tokens}
 
     # Send the message.
     response = bedrock_runtime.converse(
@@ -41,7 +40,7 @@ def generate_conversation(model_id, system_prompts, messages, temperature=0.2, m
         messages=messages,
         system=system_prompts,
         inferenceConfig=inference_config,
-        additionalModelRequestFields=additional_model_fields,
+        #additionalModelRequestFields=additional_model_fields,
     )
 
     # Log token usage.
@@ -61,18 +60,26 @@ def sentiment_analysis(text):
     Function to return a JSON object of sentiment from a given text.
     """
     system_prompts = [
-                {"text": "You are an app that performs sentiment analysis on articles. Those articles will be in french and you'll also have to answer in french. \
-                    You will have to use only 5 labels to classify them : \
+                {"text": "You are a sentiment analysis expert specializing in the perception of the French company Enedis by the public. \
+                    Your task is to analyze French-language articles and categorize them based on both sentiment and topic.  You MUST respond in French. \
+                    *Sentiment Analysis:** \
+                    Use only 5 labels for sentiment to classify them : \
                         Positif, Négatif, Factuel, Factuel positif, Factuel négatif. \
-                    You will also have to give a categorise those articles into one of those categories : \
-                        Divers, Mobilité électrique, Réseau, Aléas Climatiques, Clients, Divers, Grèves, Innovation, Linky, Marque employeur / RH, Partenariats industriels / académiques, Prévention, Raccordement, Transition écologique. \
-                    No need to justify your answer, just give the sentiment and the category."}
-    ]
+                    **Topic Categorization:** \
+                    Categorize each article into ONE of the following topics : \
+                        Divers, Mobilité électrique, Réseau, Aléas Climatiques, Clients, Grèves, Innovation, Linky, Marque employeur / RH, Partenariats industriels / académiques, Prévention, Raccordement, Transition écologique. \
+                    **Instructions for Sentiment Analysis:** \
+                    Your response MUST be in the following format:  `Sentiment,Category` (e.g., `Négatif,Grèves`).  Do NOT include parentheses or any other text.  Give ONLY the sentiment and category, separated by a comma.  Do NOT provide any explanations or justifications. \
+                    **Instructions for Analysis:** \
+                        *   Prioritize identifying the *dominant* sentiment expressed in the article.  Even if an article contains mixed sentiments, choose the one that is most prevalent. \
+                        *   For 'Factuel' sentiment, determine if the factual information presented has an overall positive or negative implication.  If the factual information is neutral, use 'Factuel'. \
+                        *   For topic categorization, select the *most relevant* topic.  If an article covers multiple topics, choose the primary one. \
+                        *   Be precise and concise in your responses."}    ]
     message = [{
         "role": "user",
         "content": [{"text": f"Analyze the sentiment of the following text: {text}."}]
     }]
-    result = generate_conversation(model_ids[0], system_prompts, message)
+    result = generate_conversation(model_ids[1], system_prompts, message)
     return result
 
 
@@ -89,15 +96,25 @@ def organise_text(text):
         "role": "user",
         "content": [{"text": f"Organise the following text: {text}."}]
     }]
-    result = generate_conversation(model_ids[0], system_prompts, message, temperature=0.1, max_tokens=10000)
+    result = generate_conversation(model_ids[1], system_prompts, message, temperature=0.3)#, max_tokens=10000)
     return result
 
 
 if __name__ == "__main__":
-    df = pd.read_excel('Data.xlsx')
-    text = organise_text(df['Articles'][0])
-    time.sleep(0.5)
-    print(f"\nOrganised Text:\n{text}")
-    print("\n=== Sentiment Analysis Example ===")
-    sentiment_analysis_json = sentiment_analysis(text)
-    print(f"\nSentiment_Analysis JSON:\n{sentiment_analysis_json}")
+    df = pd.read_csv('data/testing.csv')
+    results = pd.DataFrame(columns=['Title', 'Sentiment', 'Category', 'Text'])
+    for i in range(100, len(df)):
+        print("Index: ", i)
+        text = organise_text(df['Articles'][i])
+        result = sentiment_analysis(text)
+        print(f"Result:{result}\n")
+        try:
+            splitted_result = result.split(',')
+            sentiment, category = splitted_result[0], splitted_result[1]
+        except ValueError:
+            print(f"Error when splitting result: {result}")
+            results.to_excel('results3a.xlsx')
+            exit()
+        results.loc[i] = [df['Sujet'][i], sentiment, category, text]
+    print("\nDone\n")
+    results.to_excel('results3a.xlsx')
