@@ -16,6 +16,7 @@ model_ids = [
     "mistral.mistral-large-2407-v1:0",
     "us.amazon.nova-pro-v1:0",
     "us.amazon.nova-lite-v1:0",
+    "anthropic.claude-3-5-sonnet-20240620-v1:0",
 ]
 
 
@@ -61,7 +62,7 @@ def generate_conversation(model_id, system_prompts, messages,
     return text_response
 
 
-# voir pour utiliser guardrails (step 6 le plus interessant pour nous) et utiliser Claude 3.5 Sonnet
+# voir pour utiliser guardrails (step 6 le plus interessant pour nous)
 def sentiment_analysis(prompt, text):
     """
     Function to return a JSON object of sentiment from a given text.
@@ -77,7 +78,7 @@ def sentiment_analysis(prompt, text):
         "content": [{"text": f"Analyze the sentiment of the following text: \
             {text}."}]
     }]
-    result = generate_conversation(model_ids[1], system_prompts, message)
+    result = generate_conversation(model_ids[3], system_prompts, message)
     return result
 
 
@@ -99,10 +100,9 @@ def organise_text(prompt, text):
     return result
 
 
-# Fix prompt
-def get_text_from_pdf(prompt, text):
+def get_info_from_pdf(prompt, text):
     """
-    Function to get the text from a pdf page.
+    Function to get the informations from a pdf.
 
     Args:
         text (str): text from a pdf page.
@@ -115,5 +115,5 @@ def get_text_from_pdf(prompt, text):
             {text}."}]
     }]
     result = generate_conversation(model_ids[2], system_prompts, message,
-                                   temperature=0.1, max_tokens=10000)
+                                   temperature=0.2, max_tokens=10000)
     return result

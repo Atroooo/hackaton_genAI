@@ -1,7 +1,8 @@
 import ast
+import json
 import pandas as pd
 from PyPDF2 import PdfReader
-from prompt import get_text_from_pdf, sentiment_analysis
+from prompt import get_info_from_pdf, sentiment_analysis
 
 
 def get_prompt():
@@ -24,46 +25,58 @@ def get_prompt():
     return prompt_sentiment, prompt_read_pdf
 
 
-if __name__ == "__main__":
-    pdf = PdfReader('articles.pdf')
-    articles = pd.DataFrame(columns=['Date', 'Territoire', 'Sujet',
-                                     'Catégorie', 'Sentiment',
-                                     'Média', 'Article'])
+def get_all_infos(pdf):
+    """
+    Function to get all the pages from a pdf file.
+
+    Args:
+        pdf (file): pdf file to extract the pages from.
+    """
+    data = pd.DataFrame(columns=['Date', 'Territoire', 'Sujet', 'Catégorie',
+                                 'Sentiment', 'Média', 'Article'])
+    article = ""
     found = 0
-    index = 0
-    prompt_sentiment, prompt_read_pdf = get_prompt()
 
     for i in range(2, len(pdf.pages)):
-
+        if i % 10 == 0:
+            print(f"--- Processing page {i} ---")
         page = pdf.pages[i]
         text = page.extract_text()
-        if found:
-            article_info = get_text_from_pdf(prompt_read_pdf, text)
-            try:
-                article_info = ast.literal_eval(article_info)
-            except ValueError:
-                print(f"Error when converting to dict: {article_info}")
-                articles.to_excel('results.xlsx')
-                exit()
-
-            result = sentiment_analysis(prompt_sentiment,
-                                        article_info['Article'])
-            # print(f"Result:{result}\n")
-            try:
-                splitted_result = result.split(',')
-                sentiment, category = splitted_result[0], splitted_result[1]
-            except ValueError:
-                print(f"Error when splitting result: {result}")
-                articles.to_excel('results.xlsx')
-                exit()
-
-            article_info['Sentiment'] = sentiment
-            article_info['Catégorie'] = category
-            articles = pd.concat([articles, pd.DataFrame([article_info])],
-                                 ignore_index=True)
-            index += 1
+        if "Parution : " not in text:
+            article += text
+        else:
+            article += text
+            temp = eval(get_info_from_pdf(prompt_read_pdf, article))
+            data = pd.concat([data, pd.DataFrame([temp])], ignore_index=True)
+            article = ""
 
         if "DR " in text and found == 0:
             # Loop while we don't find the first article
             found = 1
-    articles.to_excel('results.xlsx')
+    return data
+
+
+if __name__ == "__main__":
+    pdf = PdfReader('articles.pdf')
+    prompt_sentiment, prompt_read_pdf = get_prompt()
+
+    df_articles = get_all_infos(pdf)
+
+    for i in range(len(df_articles)):
+        if i % 10 == 0:
+            print(f"--- Processing article {i} ---")
+        result = sentiment_analysis(prompt_sentiment,
+                                    df_articles['Article'][i])
+        try:
+            splitted_result = result.split(',')
+            sentiment, category = splitted_result[0], splitted_result[1]
+        except ValueError:
+            print(f"Error when splitting result: {result}, saving results...")
+            df_articles.to_excel('results_c.xlsx', index=False)
+            exit()
+        df_articles.loc[i, 'Sentiment'] = sentiment
+        df_articles.loc[i, 'Catégorie'] = category
+
+    df_articles.reindex(columns=['Date', 'Territoire', 'Sujet', 'Catégorie',
+                                 'Sentiment', 'Média', 'Article'])
+    df_articles.to_excel('results_c.xlsx', index=False)

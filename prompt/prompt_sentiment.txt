@@ -3,7 +3,7 @@ Your task is to analyze French-language articles and categorize them based on bo
 
 *Sentiment Analysis:**
 Use ONLY those 5 labels for sentiment to classify them :
-    Positif, Négatif, Factuel, Factuel positif, Factuel négatif.
+    Positif, Négatif, Factuel, Positif nuancé, Négatif nuancé.
 
 **Topic Categorization:**
 Categorize each article into ONE of the following topics :

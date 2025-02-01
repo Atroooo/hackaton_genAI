@@ -13,21 +13,22 @@ def get_prompt():
         with open("prompt_sentiment.txt", "r") as file:
             prompt_sentiment = file.read()
 
-        with open("prompt_organise.txt", "r") as file:
+        with open("prompt_organize_text.txt", "r") as file:
             prompt_organise = file.read()
-    except FileNotFoundError:
-        print("Error: Prompt file not found.")
+    except FileNotFoundError as e:
+        print("Error: Prompt file not found:", e)
         exit()
 
     return prompt_sentiment, prompt_organise
 
 
 if __name__ == "__main__":
-    df = pd.read_excel('../data/Data.xlsx')
-    results = pd.DataFrame(columns=['Title', 'Sentiment', 'Category', 'Text'])
+    df = pd.read_excel('test_data.xlsx')
+    results = pd.DataFrame(columns=['Date', 'Territoire', 'Sujet', 'Catégorie',
+                                    'Sentiment', 'Media', 'Articles'])
     prompt_sentiment, prompt_organise = get_prompt()
 
-    for i in range(100):
+    for i in range(len(df)):
         if i % 10 == 0:
             print(f"Processing article {i}")
         text = organise_text(prompt_organise, df['Articles'][i])
@@ -38,8 +39,9 @@ if __name__ == "__main__":
             sentiment, category = splitted_result[0], splitted_result[1]
         except ValueError:
             print(f"Error when splitting result: {result}, saving results...")
-            results.to_excel('results.xlsx')
+            results.to_excel('results_c.xlsx', index=False)
             exit()
-        results.loc[i] = [df['Sujet'][i], sentiment, category, text]
+        results.loc[i] = [df['Date'][i], df['Territoire'][i], df['Sujet'][i],
+                          category, sentiment,  df['Sujet'][i],  text]
     print("\nDone\n")
-    results.to_excel('results.xlsx')
+    results.to_excel('results_c.xlsx', index=False)
