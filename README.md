@@ -19,6 +19,8 @@ python get_sentiment_pdf.py
 ```
 
 ### Visualisation des données
+
+Github du front-end : https://github.com/theocerdan/ae42front
 Le front-end de visualisation se lance avec les commandes suivantes :
 ```bash
 npm install
@@ -40,7 +42,7 @@ Parmi eux, nous avons sélectionné :
 - **Nova-Pro** pour l'analyse de sentiment
 - **Nova-Lite** pour le traitement des articles de la revue de presse
 
-Un pastebin contenant l'ensemble des prompts benchmark utilisés lors du hackathon est disponible.
+Un pastebin contenant l'ensemble des prompts benchmark utilisés lors du hackathon est disponible : https://pastebin.com/A8r9BAtL
 
 Le Quadratic Weighted Kappa (QWK) est une métrique statistique évaluant l’accord entre deux évaluateurs, souvent utilisée dans les classifications ordinales. Il pénalise davantage les erreurs éloignées de la vérité. Le score varie de -1 (désaccord total) à 1 (accord parfait), avec 0 représentant un accord aléatoire.
 
