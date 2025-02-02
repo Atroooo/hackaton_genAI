@@ -72,11 +72,12 @@ if __name__ == "__main__":
             sentiment, category = splitted_result[0], splitted_result[1]
         except ValueError:
             print(f"Error when splitting result: {result}, saving results...")
-            df_articles.to_excel('results_c.xlsx', index=False)
+            df_articles.to_excel('results_pdf.xlsx', index=False)
             exit()
         df_articles.loc[i, 'Sentiment'] = sentiment
         df_articles.loc[i, 'Catégorie'] = category
 
     df_articles.reindex(columns=['Date', 'Territoire', 'Sujet', 'Catégorie',
                                  'Sentiment', 'Média', 'Article'])
-    df_articles.to_excel('results_c.xlsx', index=False)
+    print("\nDone\n")
+    df_articles.to_excel('results_pdf.xlsx', index=False)

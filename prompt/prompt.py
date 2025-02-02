@@ -78,7 +78,7 @@ def sentiment_analysis(prompt, text):
         "content": [{"text": f"Analyze the sentiment of the following text: \
             {text}."}]
     }]
-    result = generate_conversation(model_ids[3], system_prompts, message)
+    result = generate_conversation(model_ids[1], system_prompts, message)
     return result
 
 
