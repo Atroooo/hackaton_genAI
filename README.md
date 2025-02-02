@@ -49,9 +49,19 @@ Le Quadratic Weighted Kappa (QWK) est une métrique statistique évaluant l’ac
 **Score QWK obtenu : 0.651**
 (-1 = pire, 1 = parfait, 0 = aléatoire)
 
+Pour **1400 articles analysés** (.xlsx), le coût des appels aux services d'IA générative est estimé à **1.77 dollars**.
+
+Pour **l'analyse de 30 articles** (.pdf), le coût pour le traitement est estimé à **0.038 dollars**.
+
 ![image](https://github.com/user-attachments/assets/e92b2fdc-8b2f-4ece-9811-f9f2b23c0875)
 
 Le taux d'hallucination mesuré lors de nos tests est de **0.7%**.
 
 ## Prochaines étapes
-Mise en place des requêtes batch pour Amazon Bedrock.
+Mise en place des requêtes batch pour Amazon Bedrock afin d'optimiser les coûts et de respecter les quotas d'utilisation.
+
+Les avantages de cette approche incluent :
+- **Gestion automatisée des files d'attente** : optimisation du débit en ajustant dynamiquement les tâches et les soumissions.
+- **Réduction des coûts** : bénéficie d'une remise de 50 % sur la tarification des inférences batch pour un traitement économique à grande échelle.
+
+
